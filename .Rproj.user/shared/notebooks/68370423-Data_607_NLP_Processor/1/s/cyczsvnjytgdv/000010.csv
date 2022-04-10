@@ -1,0 +1,3 @@
+"0","s <- strsplit(raw$body, split = "" "")"
+"0","wsb_codex <- data.frame(ID = rep(raw$id, sapply(s, length)), word = gsub(""[^[:alnum:][:space:]]"","""",str_trim(tolower(unlist(s)))))"
+"0","wsb_codex"

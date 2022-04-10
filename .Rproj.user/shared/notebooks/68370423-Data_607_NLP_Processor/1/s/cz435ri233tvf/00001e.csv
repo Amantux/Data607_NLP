@@ -1,0 +1,27 @@
+"0","final_codex <- sentiment_aug(wsb_codex,wsb_neg)"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"0","final_codex <- final_codex %>% "
+"0","  rename(neg_words = words) %>% "
+"0","  left_join(sentiment_aug(wsb_codex,wsb_pos))"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"1","[38;5;232mJoining, by = ""ID""[39m
+"
+"0","final_codex <- final_codex %>% "
+"0","  rename(positive = words) %>% "
+"0","  left_join(sentiment_aug(wsb_codex,wsb_unc))"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"1","[38;5;232mJoining, by = ""ID""[39m
+"
+"0","final_codex <- final_codex %>% "
+"0","  rename(uncertain = words) %>% "
+"0","  left_join(sentiment_aug(wsb_codex,wsb_lit))"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"1","[38;5;232mJoining, by = ""ID""[39m
+"
+"0","final_codex <- final_codex %>% rename(lit = words)"
+"0",""
+"0","final_codex"

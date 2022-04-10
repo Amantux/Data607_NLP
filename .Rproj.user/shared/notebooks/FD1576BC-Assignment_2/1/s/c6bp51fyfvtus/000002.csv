@@ -1,0 +1,13 @@
+"0","```r
+upload_data('ratings_small')
+```"
+"1","[1] \"movie_ratings\"     \"ratings_small\"     \"ratings_small.csv\"
+"
+"0","```r
+upload_data('movies_metadata')
+```"
+"1","Warning in for (i in (1L:cols)[do]) { :
+  call dbDisconnect() when finished working with a connection
+"
+"1","[1] \"movie_ratings\"     \"movies_metadata\"   \"ratings_small\"     \"ratings_small.csv\"
+"

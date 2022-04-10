@@ -1,0 +1,7 @@
+"0","bing_word_counts <- tidy_books %>%"
+"0","  inner_join(get_sentiments(""bing"")) %>%"
+"0","  count(word, sentiment, sort = TRUE) %>%"
+"0","  ungroup()"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"0","bing_word_counts"

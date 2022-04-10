@@ -1,0 +1,6 @@
+"0","```r
+if (dbExistsTable(con, \"ratings\"))
+  dbRemoveTable(con, \"ratings\")
+current_data <- read.csv(file = \"Movie_db/ratings.csv\", header=TRUE)
+dbWriteTable(con, name = \"ratings\", value = current_data, row.names = FALSE)
+```"

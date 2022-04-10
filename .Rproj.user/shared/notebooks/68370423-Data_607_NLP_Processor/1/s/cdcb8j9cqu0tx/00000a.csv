@@ -1,0 +1,8 @@
+"0","sentiment_aug <- function(codex, purpose) {"
+"0","  out_codex <- codex %>%"
+"0","    semi_join(purpose) %>%"
+"0","    group_by(ID) %>%"
+"0","    summarize(words = n())"
+"0","  out_codex <- distinct(out_codex, ID,.keep_all = TRUE)"
+"0","  out_codex <- select(out_codex, c(""ID"",""words""))"
+"0","}"

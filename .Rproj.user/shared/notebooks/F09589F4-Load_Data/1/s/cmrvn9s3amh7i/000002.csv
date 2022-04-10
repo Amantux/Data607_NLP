@@ -1,0 +1,6 @@
+"0","```r
+
+upload_data('ratings')
+upload_data('movies_metadata')
+dbDisconnect(con)  
+```"

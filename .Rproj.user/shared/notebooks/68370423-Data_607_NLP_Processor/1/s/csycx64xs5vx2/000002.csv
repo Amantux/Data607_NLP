@@ -1,0 +1,8 @@
+"0","wsb_neg <- get_sentiments(""loughran"") %>% "
+"0","  filter(sentiment == ""negative"")"
+"0","wsb_pos <- get_sentiments(""loughran"") %>% "
+"0","  filter(sentiment == ""positive"")"
+"0","wsb_unc <- get_sentiments(""loughran"") %>% "
+"0","  filter(sentiment == ""uncertainty"")"
+"0","wsb_lit <- get_sentiments(""loughran"") %>% "
+"0","  filter(sentiment == ""litigious"")"

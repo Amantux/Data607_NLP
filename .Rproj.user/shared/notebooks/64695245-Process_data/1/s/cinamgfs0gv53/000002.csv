@@ -1,0 +1,9 @@
+"0","```r
+agg_ratings$title <- \"NAN\"
+agg_ratings$Movie_ID <- as.character(agg_ratings$Movie_ID)
+combo <-left_join(agg_ratings, movie_metadata, by = c(\"Movie_ID\" = \"id\"))
+combo$release_year = substr(combo$release_date,1,4)
+movie_ratings = subset(combo, select = c(original_title,  Rating, release_year) )
+clean_movie_ratings <- na.omit(movie_ratings) 
+head(clean_movie_ratings)
+```"

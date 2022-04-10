@@ -1,0 +1,347 @@
+---
+title: "Data 607 NLP"
+author: "AZM"
+date: "4/8/2022"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+
+```{r}
+library(tm)
+library(dplyr)
+library(stringr)
+library(tidytext)
+library(textdata)
+library(tidyr)
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<H1> First let's start duplicating the assignment in the book </H1>
+
+<H2> Let's first address the sentiments </h2>
+```{r}
+get_sentiments("afinn")
+get_sentiments("bing")
+get_sentiments("nrc")
+```
+
+
+<H2> Let's First clean the data </H2>
+
+```{r}
+
+tidy_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(
+    linenumber = row_number(),
+    chapter = cumsum(str_detect(text, 
+                                regex("^chapter [\\divxlc]", 
+                                      ignore_case = TRUE)))) %>%
+  ungroup() %>%
+  unnest_tokens(word, text)
+jane_austen_sentiment <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(book, index = linenumber %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+tidy_books
+jane_austen_sentiment
+```
+<H2> Let's make plots of sentiment over time </H2>
+
+```{r}
+library(ggplot2)
+
+ggplot(jane_austen_sentiment, aes(index, sentiment, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 2, scales = "free_x")
+```
+<H2> Let's Get Started </H2>
+```{r}
+pride_prejudice <- tidy_books %>% 
+  filter(book == "Pride & Prejudice")
+
+pride_prejudice
+
+```
+<H2> Let's start appending data and adding in filter </h2>
+```{r}
+afinn <- pride_prejudice %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = linenumber %/% 80) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc <- bind_rows(
+  pride_prejudice %>% 
+    inner_join(get_sentiments("bing")) %>%
+    mutate(method = "Bing et al."),
+  pride_prejudice %>% 
+    inner_join(get_sentiments("nrc") %>% 
+                 filter(sentiment %in% c("positive", 
+                                         "negative"))
+    ) %>%
+    mutate(method = "NRC")) %>%
+  count(method, index = linenumber %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment,
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+```
+<H2>Let's see sentiment over time </H2>
+
+```{r}
+bind_rows(afinn, 
+          bing_and_nrc) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+```
+<H2> Let's augment in sentiment data  </H2>
+
+```{r}
+bing_word_counts <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+bing_word_counts
+
+bing_word_counts %>%
+  group_by(sentiment) %>%
+  slice_max(n, n = 10) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(x = "Contribution to sentiment",
+       y = NULL)
+```
+<H2> Let's Make a word Cloud </H2>
+```{r}
+library(wordcloud)
+
+tidy_books %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+```
+<H2> Let's Make a pretty word cloud with sentiment </h2>
+
+```{r}
+library(reshape2)
+
+tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("gray20", "gray80"),
+                   max.words = 100)
+```
+<H2> Now we move onto sentences </H2>
+```{r}
+p_and_p_sentences <- tibble(text = prideprejudice) %>% 
+  unnest_tokens(sentence, text, token = "sentences")
+p_and_p_sentences$sentence[2]
+
+austen_chapters <- austen_books() %>%
+  group_by(book) %>%
+  unnest_tokens(chapter, text, token = "regex", 
+                pattern = "Chapter|CHAPTER [\\dIVXLC]") %>%
+  ungroup()
+
+austen_chapters %>% 
+  group_by(book) %>% 
+  summarise(chapters = n())
+```
+<H2> Now we do full books </H2>
+```{r}
+bingnegative <- get_sentiments("bing") %>% 
+  filter(sentiment == "negative")
+
+wordcounts <- tidy_books %>%
+  group_by(book, chapter) %>%
+  summarize(words = n())
+
+tidy_books %>%
+  semi_join(bingnegative) %>%
+  group_by(book, chapter) %>%
+  summarize(negativewords = n()) %>%
+  left_join(wordcounts, by = c("book", "chapter")) %>%
+  mutate(ratio = negativewords/words) %>%
+  filter(chapter != 0) %>%
+  slice_max(ratio, n = 1) %>% 
+  ungroup()
+```
+
+<H1> Let's first grab our data set </H1>
+
+I really wanted to see sentiment analysis on WSB. WSB is a very popular subreddit responsible for a lot of the unique retail trading positions of late!
+
+
+```{r}
+url.data <- "https://raw.githubusercontent.com/fivethirtyeight/superbowl-ads/main/superbowl-ads.csv"
+raw <- read.csv("WSB_Posts/reddit_wsb.csv", header = TRUE,)
+raw
+```
+<H2> Let's look at at the Loughran sentiments </H2>
+
+Firstly these all seem rather useful financial statement terms, but I really want to know how they will do for Wall Street Bets style data (https://www.reddit.com/r/wallstreetbets/)!
+
+```{r}
+get_sentiments("loughran")
+```
+
+<H2> Let's First make our codex of 1 word tied to each post </H2>
+
+```{r}
+s <- strsplit(raw$body, split = " ")
+wsb_codex <- data.frame(ID = rep(raw$id, sapply(s, length)), word = gsub("[^[:alnum:][:space:]]","",str_trim(tolower(unlist(s)))))
+wsb_codex
+```
+
+<H2> Now lets take a peek at the words in the DF </H2>
+
+At this point, we have one word per line, let's make a word cloud of our data!
+
+
+
+```{r}
+wsb_codex %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 300))
+```
+
+It looks pretty interesting! I love how you can see AMC, GME, Short, all of which were highly focused topics on the subreddit. 
+
+
+<H2> Sentiment Augmentation </H2>
+
+```{r}
+wsb_sentiment_counts <- wsb_codex %>%
+  inner_join(get_sentiments("loughran")) %>%
+  count(word, ID, sentiment, sort = TRUE,) %>%
+  rename(word_count = n) %>%
+  ungroup()
+wsb_sentiment_counts
+```
+
+<H2> Let's Start creating counts and filters </H2>
+
+First lets get all the options from the loughran set:
+
+```{r}
+wsb_neg <- get_sentiments("loughran") %>% 
+  filter(sentiment == "negative")
+wsb_pos <- get_sentiments("loughran") %>% 
+  filter(sentiment == "positive")
+wsb_unc <- get_sentiments("loughran") %>% 
+  filter(sentiment == "uncertainty")
+wsb_lit <- get_sentiments("loughran") %>% 
+  filter(sentiment == "litigious")
+```
+
+Now let's try an example of data, using a focus on the negative set
+
+
+```{r}
+
+
+head(wsb_codex)
+
+neg_codex <- wsb_codex %>%
+  semi_join(wsb_neg) %>%
+  group_by(ID) %>%
+  summarize(neg_words = n())
+neg_codex <- distinct(neg_codex, ID,.keep_all = TRUE)
+head(neg_codex)
+neg_codex <- select(neg_codex, c("ID","neg_words"))
+neg_codex 
+```
+
+
+<H2> Let's create a function </H2>
+
+
+So now we will make it into a function
+
+```{r}
+sentiment_aug <- function(codex, purpose) {
+  out_codex <- codex %>%
+    semi_join(purpose) %>%
+    group_by(ID) %>%
+    summarize(words = n())
+  out_codex <- distinct(out_codex, ID,.keep_all = TRUE)
+  out_codex <- select(out_codex, c("ID","words"))
+}
+```
+
+And just to ensure that our changes apply properly, and to compare that our dataframes are the same
+
+```{r}
+test <- sentiment_aug(wsb_codex,wsb_neg)
+test
+all_equal(test, neg_codex)
+```
+
+<H2> Now let's tie everything together </H2>
+
+What we will do here is a mess of augmenting counts for each of the words into the dataframe, and then tie it together with an ID!
+  
+```{r}
+final_codex <- sentiment_aug(wsb_codex,wsb_neg)
+final_codex <- final_codex %>% 
+  rename(neg_words = words) %>% 
+  left_join(sentiment_aug(wsb_codex,wsb_pos))
+final_codex <- final_codex %>% 
+  rename(positive = words) %>% 
+  left_join(sentiment_aug(wsb_codex,wsb_unc))
+final_codex <- final_codex %>% 
+  rename(uncertain = words) %>% 
+  left_join(sentiment_aug(wsb_codex,wsb_lit))
+final_codex <- final_codex %>% rename(lit = words)
+
+final_codex
+```
+
+
+<H2> Final Notes </H2>
+
+At this point, we have managed to attach sentiment to blog posts on the popular WSB subreddit. This could have a lot of fun uses, espeically if you factor in a ticker symbol filter! 
+
+I'd love to see the data over time for this, but I didn't have enough time to complete it!
+
+
+<H1> Citations </H1>
+
+WSB Post Data: https://www.kaggle.com/datasets/gpreda/reddit-wallstreetsbets-posts/code
+
+Robinson, Julia Silge and David. “2 Sentiment Analysis with Tidy Data: Text Mining with R.” 2 Sentiment Analysis with Tidy Data | Text Mining with R, https://www.tidytextmining.com/sentiment.html. 
+
+
+Finn Årup Nielsen, "A new ANEW: evaluation of a word list for sentiment analysis in microblogs", Proceedings of the ESWC2011 Workshop on 'Making Sense of Microposts': Big things come in small packages. Volume 718 in CEUR Workshop Proceedings: 93-98. 2011 May. Matthew Rowe, Milan Stankovic, Aba-Sah Dadzie, Mariann Hardey (editors)
+
+
+This dataset was first published in Minqing Hu and Bing Liu, “Mining and summarizing customer reviews.”, Proceedings of the ACM SIGKDD International Conference on Knowledge Discovery & Data Mining (KDD-2004), 2004. 
+
+This dataset was published in Loughran, T. and McDonald, B. (2011), “When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks.” The Journal of Finance, 66: 35-65. 
+
+
+This dataset was published in Saif Mohammad and Peter Turney. (2013), “Crowdsourcing a Word-Emotion Association Lexicon.” Computational Intelligence, 29(3): 436-465. 
+
+
+

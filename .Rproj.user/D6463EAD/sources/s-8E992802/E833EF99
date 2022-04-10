@@ -1,0 +1,25 @@
+{
+    "id": "E833EF99",
+    "path": "~/GitHub/Data607_Assignment_2/Process_data.Rmd",
+    "project_path": null,
+    "type": "r_markdown",
+    "hash": "2242724730",
+    "contents": "",
+    "dirty": false,
+    "created": 1649459389071.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1644647866,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1649459392017,
+    "read_only": false,
+    "read_only_alternatives": []
+}

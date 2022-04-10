@@ -1,0 +1,2 @@
+"0","neg_codex <- select(neg_codex, c(""ID"",""neg_words""))"
+"0","neg_codex "

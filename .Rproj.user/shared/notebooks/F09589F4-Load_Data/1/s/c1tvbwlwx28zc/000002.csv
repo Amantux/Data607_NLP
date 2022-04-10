@@ -1,0 +1,10 @@
+"0","```r
+upload_data <- function(file_name) {
+  if (dbExistsTable(con, file_name))
+    dbRemoveTable(con, file_name)
+  current_data <- read.csv(file = paste('movie_db/',file_name,'.csv', sep = \"\"), header=TRUE)
+  dbWriteTable(con, name = file_name, value = current_data, row.names = FALSE)
+  dbListTables(con)
+}
+
+```"

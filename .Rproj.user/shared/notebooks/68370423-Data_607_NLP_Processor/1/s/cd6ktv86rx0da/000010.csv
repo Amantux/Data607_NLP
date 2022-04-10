@@ -1,0 +1,8 @@
+"0","wsb_sentiment_counts <- wsb_codex %>%"
+"0","  inner_join(get_sentiments(""loughran"")) %>%"
+"0","  count(word, ID, sentiment, sort = TRUE,) %>%"
+"0","  rename(word_count = n) %>%"
+"0","  ungroup()"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"0","wsb_sentiment_counts"

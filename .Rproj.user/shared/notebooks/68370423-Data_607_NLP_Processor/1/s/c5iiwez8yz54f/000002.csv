@@ -1,0 +1,21 @@
+"0","library(reshape2)"
+"2","Warning:"
+"2"," package ‘reshape2’ was built under R version 4.1.3
+"
+"2","
+Attaching package: ‘reshape2’
+
+"
+"2","The following object is masked from ‘package:tidyr’:
+
+    smiths
+
+"
+"0","tidy_books %>%"
+"0","  inner_join(get_sentiments(""bing"")) %>%"
+"0","  count(word, sentiment, sort = TRUE) %>%"
+"0","  acast(word ~ sentiment, value.var = ""n"", fill = 0) %>%"
+"0","  comparison.cloud(colors = c(""gray20"", ""gray80""),"
+"0","                   max.words = 100)"
+"1","[38;5;232mJoining, by = ""word""[39m
+"

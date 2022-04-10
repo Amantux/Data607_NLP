@@ -1,0 +1,104 @@
+---
+title: Data 607 Project-2
+author: Alex Moyse
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+<H1> The library Load in </H1>
+
+```{r}
+library(tidyverse)
+library(openxlsx)
+library(dplyr)
+library(jsonlite)
+library(httr)
+library(lares)
+```
+<H1> The Prelims </H1>
+
+<H2> Signing up for a NYT Developer account </H2>
+
+<h2> Testing it with postman </H2>
+
+I really like Postman as a simple API tester, it really easily allows for parameterisation and testing of APIs, not to mention great logging and debugging.
+
+Here is my first test of the NYT API
+
+![NYT API TEST](images/API_Keys.png)
+
+<H1> A side note to keying </H1>
+```{r}
+test <- get_creds("service1")
+key <- test$key
+```
+This is just a simple keying use for R
+
+
+<H1> JSON...Oh My! </H1>
+
+As we can see from the test string above, we successfully get a reasonably well formed json response. It does a great job. From there, we can test the same string in R and attempt a basic read into a dataframe. First things first, lets handle keying
+
+
+
+```{r}
+Json_address = sprintf("https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=%s&api-key=%s", "godfather", key)
+json_raw <- fromJSON(Json_address)
+json_table <- as.data.frame(json_raw,)
+json_table
+```
+
+<h1> Let's Parameterize our request string </h1>
+
+```{r}
+search_term = "godfather"
+url = sprintf("https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=%s&api-key=%s", search_term, key)
+```
+
+
+<h1> Let's modularize our call </h1>
+
+<H2> Step 1-Let's take our search term and key and make them variables, then try and pull the same table. </H2>
+
+```{r}
+search_term = "godfather"
+api_url = sprintf("https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=%s&api-key=%s", search_term, key)
+json_raw <- fromJSON(api_url)
+json_table <- as.data.frame(json_raw,)
+json_table
+```
+
+<H2> Step 2-Making a function </h2>
+```{r}
+search_term = "godfather"
+getNytData <- function(search_term, key) {
+api_url = sprintf("https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=%s&api-key=%s", search_term, key)
+api_url
+json_raw <- fromJSON(api_url)
+json_table <- as.data.frame(json_raw,)
+return(json_table)
+}
+getNytData(search_term, key)
+
+```
+
+<H2> The Function works! </h2>
+
+So at this point, we have a function that works, a key, and best of all its all secure! At this point we are complete but there are still a few things I want to try!
+
+<H1> The things to play with </H1>
+
+1. can you import an image from a link in R Studio:
+
+![NYT API TEST](https://static01.nyt.com/images/2019/06/05/arts/blackgodfather1/blackgodfather1-mediumThreeByTwo210.jpg)
+
+YES!
+
+2. How I would make this better
+Ideally I'd love to spin up a container, keep the secret as an env, and then launch it in that container, but this project doesn't require that degree of complexity! 
+
+<H1> Conclusion </H1>
+
+This project is finished as I connected to an API & loaded it into a dataframe!

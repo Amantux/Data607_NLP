@@ -1,0 +1,6 @@
+"0","wsb_codex %>%"
+"0","  anti_join(stop_words) %>%"
+"0","  count(word) %>%"
+"0","  with(wordcloud(word, n, max.words = 300))"
+"1","[38;5;232mJoining, by = ""word""[39m
+"

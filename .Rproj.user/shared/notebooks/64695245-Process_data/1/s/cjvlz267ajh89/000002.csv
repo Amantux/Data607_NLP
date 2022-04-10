@@ -1,0 +1,6 @@
+"0","```r
+con <- dbConnect(RMariaDB::MariaDB(), username=\"root\", password=\"TestCase123.\", dbname =\"review_db\", host=\"localhost\")
+dbListTables(con)
+```"
+"1","[1] \"movie_ratings\"   \"movies_metadata\"
+"

@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(RMariaDB)
+library(DBI)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+con <- dbConnect(RMariaDB::MariaDB(), username="root", password="TestCase123.", dbname ="review_db", host="localhost")
+dbListTables(con)
+```
+
+```{r}
+avg_ratings <- dbReadTable(con = con, name = 'movie_ratings')
+agg_ratings <- aggregate(avg_ratings$rating, list(avg_ratings$movieId), FUN=mean)
+colnames(agg_ratings) <- c('Movie_ID','Rating')
+head(agg_ratings)
+```
+
+```{r}
+movie_metadata <- dbReadTable(con = con, name = 'movies_metadata')
+```
+
+
+```{r}
+agg_ratings$title <- "NAN"
+agg_ratings$Movie_ID <- as.character(agg_ratings$Movie_ID)
+combo <-left_join(agg_ratings, movie_metadata, by = c("Movie_ID" = "id"))
+combo$release_year = substr(combo$release_date,1,4)
+movie_ratings = subset(combo, select = c(original_title,  Rating, release_year) )
+clean_movie_ratings <- na.omit(movie_ratings) 
+head(clean_movie_ratings)
+```
+
+```{r, echo=FALSE}
+plot(x=clean_movie_ratings$release_year, y=clean_movie_ratings$Rating,
+pch=18,
+cex=1,
+xlab="Year", ylab="Rating",
+main="Year Vs Rating",
+)
+```

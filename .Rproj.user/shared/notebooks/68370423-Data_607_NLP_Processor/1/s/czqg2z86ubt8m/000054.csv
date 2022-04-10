@@ -1,0 +1,9 @@
+"0",""
+"0","neg_codex <- wsb_codex %>%"
+"0","  semi_join(wsb_neg) %>%"
+"0","  group_by(ID) %>%"
+"0","  summarize(neg_words = n())"
+"1","[38;5;232mJoining, by = ""word""[39m
+"
+"0","neg_codex <- distinct(neg_codex, ID,.keep_all = TRUE)"
+"0","head(neg_codex)"
